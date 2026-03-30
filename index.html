@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnatomijAI - Ucenje anatomije z AI</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loading-text">Nalagam...</p>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- SECTION: Setup (API key) -->
+    <section id="section-setup" class="section active">
+        <div class="container">
+            <div class="hero">
+                <div class="logo">
+                    <svg viewBox="0 0 100 100" class="logo-icon">
+                        <path d="M50 10 C25 10, 10 30, 10 50 C10 75, 30 90, 50 90 C70 90, 90 75, 90 50 C90 30, 75 10, 50 10Z" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <path d="M35 40 Q50 20, 65 40 L65 65 Q50 80, 35 65Z" fill="currentColor" opacity="0.3"/>
+                        <path d="M50 35 L50 70" stroke="currentColor" stroke-width="2"/>
+                        <path d="M35 50 L65 50" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <h1>AnatomijAI</h1>
+                </div>
+                <p class="subtitle">Ucenje anatomije z umetno inteligenco</p>
+            </div>
+
+            <div class="card setup-card">
+                <h2>Zacni z ucenjem</h2>
+                <p class="card-desc">Vnesi svoj Anthropic API kljuc za dostop do AI-generirane vsebine.</p>
+                <div class="input-group">
+                    <label for="api-key-input">API kljuc</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="api-key-input" placeholder="sk-ant-...">
+                        <button id="toggle-key-visibility" class="btn-icon" title="Pokazi/skrij kljuc">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <small>Kljuc se shrani lokalno v brskalniku. <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Pridobi kljuc</a></small>
+                </div>
+                <button id="btn-save-key" class="btn btn-primary">Shrani in nadaljuj</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Home (topic selection) -->
+    <section id="section-home" class="section hidden">
+        <div class="container">
+            <header class="app-header">
+                <div class="header-left">
+                    <svg viewBox="0 0 100 100" class="header-logo">
+                        <path d="M50 10 C25 10, 10 30, 10 50 C10 75, 30 90, 50 90 C70 90, 90 75, 90 50 C90 30, 75 10, 50 10Z" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <path d="M35 40 Q50 20, 65 40 L65 65 Q50 80, 35 65Z" fill="currentColor" opacity="0.3"/>
+                    </svg>
+                    <h1>AnatomijAI</h1>
+                </div>
+                <button id="btn-settings" class="btn-icon" title="Nastavitve">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </header>
+
+            <!-- Progress overview -->
+            <div id="progress-overview" class="progress-overview"></div>
+
+            <h2 class="section-title">Izberi temo</h2>
+            <div id="topics-grid" class="topics-grid"></div>
+
+            <div id="topic-actions" class="topic-actions hidden">
+                <h3 id="selected-topic-name"></h3>
+                <p id="selected-topic-desc"></p>
+                <div class="action-buttons">
+                    <button id="btn-learn" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                        Ucenje
+                    </button>
+                    <button id="btn-quiz" class="btn btn-secondary">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                        Kviz
+                    </button>
+                    <button id="btn-flashcards" class="btn btn-accent">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                        Kartice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Learn -->
+    <section id="section-learn" class="section hidden">
+        <div class="container">
+            <button id="btn-back-learn" class="btn-back">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Nazaj
+            </button>
+            <h2 id="learn-title" class="section-title"></h2>
+            <div id="learn-flashcards" class="learn-flashcards-section"></div>
+        </div>
+    </section>
+
+    <!-- SECTION: Quiz -->
+    <section id="section-quiz" class="section hidden">
+        <div class="container">
+            <button id="btn-back-quiz" class="btn-back">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Nazaj
+            </button>
+            <div class="quiz-header">
+                <h2 id="quiz-title" class="section-title"></h2>
+                <div class="quiz-progress">
+                    <span id="quiz-progress-text">1 / 10</span>
+                    <div class="progress-bar">
+                        <div id="quiz-progress-bar" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="quiz-container" class="quiz-container"></div>
+        </div>
+    </section>
+
+    <!-- SECTION: Quiz Results -->
+    <section id="section-results" class="section hidden">
+        <div class="container">
+            <div class="results-card">
+                <div id="results-icon" class="results-icon"></div>
+                <h2>Rezultati</h2>
+                <div id="results-score" class="results-score"></div>
+                <div id="results-details" class="results-details"></div>
+                <div class="results-actions">
+                    <button id="btn-retry-quiz" class="btn btn-primary">Ponovi kviz</button>
+                    <button id="btn-results-home" class="btn btn-secondary">Domov</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Flashcards -->
+    <section id="section-flashcards" class="section hidden">
+        <div class="container">
+            <button id="btn-back-flashcards" class="btn-back">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Nazaj
+            </button>
+            <h2 id="flashcards-title" class="section-title"></h2>
+            <div class="flashcards-progress">
+                <span id="flashcards-progress-text">1 / 10</span>
+            </div>
+            <div id="flashcard-container" class="flashcard-container">
+                <div id="flashcard" class="flashcard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <p id="flashcard-term"></p>
+                            <small>Klikni za odgovor</small>
+                        </div>
+                        <div class="flashcard-back">
+                            <img id="flashcard-img" class="flashcard-back-img" src="" alt="" style="display:none">
+                            <p id="flashcard-definition"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flashcard-actions">
+                <button id="btn-fc-dont-know" class="btn btn-danger">Ne znam</button>
+                <button id="btn-fc-know" class="btn btn-success">Znam</button>
+            </div>
+            <div id="flashcards-summary" class="flashcards-summary hidden">
+                <h3>Povzetek</h3>
+                <p id="fc-summary-text"></p>
+                <button id="btn-fc-retry" class="btn btn-primary">Ponovi neznane</button>
+                <button id="btn-fc-home" class="btn btn-secondary">Domov</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Settings -->
+    <section id="section-settings" class="section hidden">
+        <div class="container">
+            <button id="btn-back-settings" class="btn-back">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Nazaj
+            </button>
+            <h2 class="section-title">Nastavitve</h2>
+            <div class="card">
+                <h3>API kljuc</h3>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="settings-api-key" placeholder="sk-ant-...">
+                        <button id="toggle-settings-key" class="btn-icon" title="Pokazi/skrij">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <button id="btn-update-key" class="btn btn-primary" style="margin-top:0.5rem;">Posodobi kljuc</button>
+                </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>Podatki</h3>
+                <p>Ponastavi ves napredek in shranjene podatke.</p>
+                <button id="btn-clear-data" class="btn btn-danger">Ponastavi podatke</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox overlay -->
+    <div id="lightbox" class="lightbox hidden">
+        <button id="lightbox-close" class="lightbox-close" title="Zapri">&times;</button>
+        <button id="lightbox-prev" class="lightbox-nav lightbox-prev-btn" title="Prejsnja">&lsaquo;</button>
+        <img id="lightbox-img" class="lightbox-img" src="" alt="Povecava">
+        <button id="lightbox-next" class="lightbox-nav lightbox-next-btn" title="Naslednja">&rsaquo;</button>
+        <div id="lightbox-counter" class="lightbox-counter"></div>
+    </div>
+
+    <script src="js/topics.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/progress.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/learn.js"></script>
+    <script src="js/quiz.js"></script>
+    <script src="js/flashcards.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
