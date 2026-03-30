@@ -76,7 +76,7 @@ const TOPICS = [
             'images/krvni-obtoki/image7.gif', 'images/krvni-obtoki/image8.png',
             'images/krvni-obtoki/image9.png', 'images/krvni-obtoki/image10.png',
             'images/krvni-obtoki/image11.png', 'images/krvni-obtoki/image12.png',
-            'images/krvni-obtoki/image13.png'
+            'images/krvni-obtoki/image13.png', 'images/krvni-obtoki/image14.png'
         ]
     }
 ];
